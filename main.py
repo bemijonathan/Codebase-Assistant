@@ -1,6 +1,8 @@
 import streamlit as st
 import os
 from zipfile import ZipFile
+import shutil
+
 
 st.title("Codebase Assistant")
 
@@ -21,6 +23,10 @@ if uploaded_file is not None:
     temp_dir = os.path.join("temp_code")
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
+    else:
+        shutil.rmtree(temp_dir)
+        os.makedirs(temp_dir)
+
 
     with open(os.path.join(temp_dir, "code.zip"), "wb") as f:
         f.write(bytes_data)
