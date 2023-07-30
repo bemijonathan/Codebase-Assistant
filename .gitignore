@@ -1,3 +1,6 @@
 .idea/
 venv/
 temp_code/
+.env
+.vscode
+todo/

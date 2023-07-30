@@ -1,61 +1,76 @@
 import ast
 import os
-
+import extraction
 from documents import FunctionDoc, ClassDoc, Document
+from typing import List
 
-import os
 
-
-def get_all_py_files(code_dir):
+def get_all_py_files(code_dir: str) -> List({
+    'path': str,
+    'content': str
+}):  # return a list of dictionaries
     py_files = []
-
     for root, dirs, files in os.walk(code_dir):
         for file in files:
-            if file.endswith('.py'):
-                py_files.append(os.path.join(root, file))
+            if file.endswith('.py') or file.endswith('.js'):
+                file_path = os.path.join(root, file)
+                with open(file_path) as f:
+                    content = f.read()
 
+                py_files.append({
+                    'path': file_path,
+                    'content': content
+                })
     return py_files
 
 
-def parse_code(code_dir):
+def process_functions(func_nodes: list[ast.FunctionDef]):
+    functions = []
+    for func_node in func_nodes:
+        func_doc = FunctionDoc(
+            name=func_node.name,
+            params=[p.arg for p in func_node.args.args],
+            docstring=ast.get_docstring(func_node),
+            decorators=[d.name for d in func_node.decorator_list]
+        )
+        functions.append(func_doc)
+
+    return functions
+
+
+def process_classes(class_nodes: List[ast.ClassDef]):
+    classes = []
+    for class_node in class_nodes:
+        class_doc = ClassDoc(
+            name=class_node.name,
+            methods=[n.name for n in class_node.body if isinstance(
+                n, ast.FunctionDef)],
+            docstring=ast.get_docstring(class_node)
+        )
+        classes.append(class_doc)
+
+    return classes
+
+
+def parse_code(code_dir: str) -> List[str]:
     docs = []
-
     for filepath in get_all_py_files(code_dir):
-        tree = ast.parse(open(filepath))
-        file_name = os.path.basename(filepath)
-        file_docstrings = ast.get_docstring(tree)
+        metadata = extraction.extract_metadata(filepath)
+        function_docs = process_functions(metadata["functions"])
+        class_docs = process_classes(metadata["classes"])
 
-        functions = []
-        for node in tree.body:
-            if isinstance(node, ast.FunctionDef):
-                func_doc = get_function_docs(node)
-                functions.append(func_doc)
+        doc = Document(
+            filepath=filepath['path'],
+            docstrings=filepath["content"],
+            function_docs=function_docs,
+            class_docs=class_docs,
+            tokens=metadata["tokens"]
+        )
 
-        classes = []
-        for node in tree.body:
-            if isinstance(node, ast.ClassDef):
-                class_doc = get_class_docs(node)
-                classes.append(class_doc)
-
-        doc = Document(filepath,
-                       file_name=file_name,
-                       docstrings=file_docstrings,
-                       functions=functions,
-                       classes=classes)
         docs.append(doc)
 
     return docs
 
 
-def get_function_docs(func_node):
-    func_name = func_node.name
-    func_docstrings = ast.get_docstring(func_node)
-
-    return FunctionDoc(name=func_name, docstrings=func_docstrings)
-
-
-def get_class_docs(class_node):
-    class_name = class_node.name
-    class_docstrings = ast.get_docstring(class_node)
-
-    return ClassDoc(name=class_name, docstrings=class_docstrings)
+# TODO: remove for testing
+# parse_code("./temp_code/quote_disp")
