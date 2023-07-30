@@ -1,4 +1,5 @@
-# documents.py
+from typing import List
+
 
 class FunctionDoc:
     def __init__(self, name, docstrings):
@@ -13,9 +14,14 @@ class ClassDoc:
 
 
 class Document:
-    def __init__(self, filepath, file_name, docstrings, functions, classes):
+
+    def __init__(self, filepath: str, file_name: str, docstrings: str,
+                 functions: List[FunctionDoc], classes: List[ClassDoc],
+                 tokens: List[int]) -> None:
+
         self.filepath = filepath
         self.file_name = file_name
         self.docstrings = docstrings
         self.functions = functions
         self.classes = classes
+        self.tokens = tokens
