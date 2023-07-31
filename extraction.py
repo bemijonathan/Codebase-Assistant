@@ -1,5 +1,5 @@
 from transformers import AutoTokenizer
-from ast import parse
+from ast import parse, FunctionDef, ClassDef
 import re
 
 TOKENIZERS = {
@@ -51,21 +51,17 @@ def extract_metadata(file_path: {
     # Extract AST metadata
     functions = []
     for node in ast.body:
-        if isinstance(node, ast.FunctionDef):
-            functions.append(node.name)
+        if isinstance(node, FunctionDef):
+            functions.append(node)
 
     classes = []
     for node in ast.body:
-        if isinstance(node, ast.ClassDef):
-            classes.append(node.name)
-
-    # Tokenize code
-    language = get_language(file_path['path'])
-    tokens = tokenize_code(file_path['content'], language)
+        if isinstance(node, ClassDef):
+            classes.append(node)
 
     return {
         "ast": ast,
         "functions": functions,
         "classes": classes,
-        "tokens": tokens
+        "tokens": file_path['content']
     }

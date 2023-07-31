@@ -1,10 +1,20 @@
-from typing import List
+from typing import Optional, List
 
 
 class FunctionDoc:
-    def __init__(self, name, docstrings):
+
+    def __init__(self,
+                 name: str,
+                 params: List[str],
+                 docstring: Optional[str] = '',
+                 decorators: List[str] = None,
+                 location: tuple = None):
+
         self.name = name
-        self.docstrings = docstrings
+        self.params = params
+        self.docstring = docstring
+        self.decorators = decorators if decorators else []
+        self.location = location
 
 
 class ClassDoc:
@@ -16,8 +26,8 @@ class ClassDoc:
 class Document:
 
     def __init__(self, filepath: str, file_name: str, docstrings: str,
-                 functions: List[FunctionDoc], classes: List[ClassDoc],
-                 tokens: List[int]) -> None:
+                 functions: list[FunctionDoc], classes: list[ClassDoc],
+                 tokens: list[int]) -> None:
 
         self.filepath = filepath
         self.file_name = file_name
