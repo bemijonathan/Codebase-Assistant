@@ -33,45 +33,30 @@ def embed_text(text):
 
 def index_document(doc):
     index = pinecone.Index(index_name=index_name)
+    d = doc.docstrings
+    vector = embed_text(d)
 
-    # Embed functions
-    for func in doc.functions:
-        sleep()  # Rate limit OpenAI calls
-        text = func.name + (func.docstring or "")
-        vector = embed_text(text)
-        index.upsert(vectors=[(func.name, vector)])
-
-    # Embed classes
-    for cls in doc.classes:
-        sleep()  # Rate limit OpenAI calls
-        text = cls.name + (cls.docstring or "")
-        vector = embed_text(text)
-        index.upsert(vector=[(cls.name,  vector)])
-
-    # Index tokens
-    sleep()  # Rate limit OpenAI calls
-    token_vectors = embed_text(doc.tokens)
-
-    index.upsert(vectors=[('tokens', token_vectors)])
+    index.upsert([(doc.file_name, vector, {"meta": d})])
+    sleep()
 
 
 def search(query_vector):
     index = pinecone.Index(index_name=index_name)
+    return index.query([query_vector], top_k=5, include_metadata=True)
 
-    return index.query([query_vector], top_k=5)
 
+def answer_question(question, texts):
+    prompt = 'using the ast from this codebase answer this question: question: ' + \
+        question + ' AST: '.join(texts)
 
-def answer_question(texts):
-    # Combine the texts into a single string
-    prompt = ' '.join(texts)
-
-    # Generate a follow-up response using OpenAI's API
-    response = openai.Completion.create(
-        # TODO: should be using davincis model or codex
-        engine="text-similarity-davinci-001",
-        prompt=prompt,
-        max_tokens=100
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo-0301",
+        messages=[
+            {"role": "system",
+                "content": "Assistant is a large language model trained by OpenAI."},
+            {"role": "user", "content": f"Question: {prompt}"},
+        ],
+        max_tokens=500
     )
 
-    # Return the generated text
-    return response['choices'][0]['text']['content']
+    return response['choices'][0]['message']['content']

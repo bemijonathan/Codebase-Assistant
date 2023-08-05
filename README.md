@@ -34,7 +34,7 @@ Code Assistant is an AI-powered code comprehension assistant. It allows users to
 pip install -r requirements.txt
 
 # Run Streamlit UI
-streamlit run main.py
+streamlit run app.py
 ```
 
 ## Next Steps
