@@ -16,12 +16,18 @@ def prompt_code_assistant(query):
 
 
 st.title("Codebase Assistant")
-
-question = st.text_input(
-    "Ask a question about the code base"
-)
-
-button = st.form_submit_button("Submit")
+s = st.text("")
+with st.form("my_form"):
+    st.write("Inside the form")
+    question = st.text_input(
+        "Ask a question about the code base"
+    )
+    # Every form must have a submit button.
+    submitted = st.form_submit_button("Submit")
+    if submitted:
+        d = prompt_code_assistant(question)
+        print(d)
+        s.text = "d"
 
 
 if question:
