@@ -4,3 +4,5 @@ temp_code/
 .env
 .vscode
 todo/
+.streamlit
+namespaces.txt

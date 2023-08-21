@@ -1,6 +1,5 @@
-import ast
 import os
-from documents import FunctionDoc, ClassDoc, Document
+from documents import Document
 
 
 def get_all_py_files(code_dir: str) -> list({

@@ -25,13 +25,7 @@ class ClassDoc:
 
 class Document:
 
-    def __init__(self, filepath: str, file_name: str, docstrings: str,
-                 functions: list[FunctionDoc], classes: list[ClassDoc],
-                 tokens: list[int]) -> None:
-
+    def __init__(self, filepath: str, file_name: str, docstrings: str):
         self.filepath = filepath
         self.file_name = file_name
         self.docstrings = docstrings
-        self.functions = functions
-        self.classes = classes
-        self.tokens = tokens
